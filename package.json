@@ -1,0 +1,67 @@
+{
+  "name": "studyroom",
+  "version": "0.1.7",
+  "private": true,
+  "description": "Um espaço tranquilo para estudar",
+  "homepage": "",
+  "author": "StudyRoom",
+  "main": "dist-electron/main.cjs",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "node scripts/pdf-assets.mjs && tsc --noEmit && vite build && node scripts/build.mjs",
+    "test": "vitest run",
+    "test:integration": "npm run build && playwright test",
+    "dist:win": "npm run build && electron-builder --win nsis",
+    "dist:linux": "npm run build && electron-builder --linux AppImage deb"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0",
+    "@tailwindcss/vite": "^4.1.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "electron": "44.7.0",
+    "electron-builder": "26.15.3",
+    "esbuild": "^0.25.0",
+    "pdfjs-dist": "6.4.299",
+    "prettier": "^3.9.9",
+    "tailwindcss": "^4.1.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.0",
+    "vite": "^7.1.0",
+    "vitest": "^5.0.3"
+  },
+  "build": {
+    "appId": "app.studyroom.desktop",
+    "productName": "StudyRoom",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Education",
+      "maintainer": "StudyRoom"
+    }
+  }
+}

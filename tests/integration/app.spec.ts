@@ -291,6 +291,31 @@ test('aplicativo real: onboarding, persistência, navegador, redirecionamentos, 
   await page.getByRole('button', { name: 'Pausar', exact: true }).click();
   await expect(page.getByText('Uma pausa também faz parte.')).toBeVisible();
   expect((await viewBounds()).fullscreen).toBe(true);
+  const pausedBeforeGame = await page.evaluate(() =>
+    window.studyroom.command({ type: 'snapshot' }),
+  );
+  await page.getByRole('button', { name: '5 minutos', exact: true }).click();
+  await expect(page.getByRole('timer')).toHaveText('05:00');
+  await page.getByRole('button', { name: '3 minutos', exact: true }).click();
+  await page.getByRole('button', { name: 'Jogar cobrinha', exact: true }).click();
+  await page.getByRole('button', { name: 'Continuar jogo', exact: true }).click();
+  await expect.poll(() => page.locator('.snake-head').getAttribute('x')).not.toBe('61');
+  await page.locator('.snake-board').press('ArrowUp');
+  await expect.poll(() => page.locator('.snake-head').getAttribute('y')).not.toBe('91');
+  await page.getByRole('timer').click();
+  const stopped = await page.locator('.snake-head').getAttribute('y');
+  await page.waitForTimeout(350);
+  expect(await page.locator('.snake-head').getAttribute('y')).toBe(stopped);
+  await page.getByRole('button', { name: 'Continuar jogo', exact: true }).click();
+  await page.screenshot({ path: 'test-results/study-break.png' });
+  await page.clock.setSystemTime(new Date(Date.now() + 181_000));
+  await expect(page.getByRole('status')).toHaveText('Pausa concluída. Vamos voltar ao estudo?');
+  await expect(page.getByRole('timer')).toHaveText('00:00');
+  await expect(page.getByRole('button', { name: 'Continuar jogo', exact: true })).toBeHidden();
+  const pausedAfterGame = await page.evaluate(() => window.studyroom.command({ type: 'snapshot' }));
+  expect(pausedAfterGame.active!.effectiveMs).toBe(pausedBeforeGame.active!.effectiveMs);
+  expect(pausedAfterGame.active!.status).toBe('paused');
+  await page.clock.setSystemTime(new Date());
   await page.getByRole('button', { name: 'Retomar', exact: true }).click();
   await expect(page.getByText('Uma pausa também faz parte.')).toBeHidden();
   const immersiveState = await page.evaluate(() => window.studyroom.command({ type: 'snapshot' }));

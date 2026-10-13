@@ -66,3 +66,11 @@ Login real, CAPTCHA, questões autenticadas, instalação interativa NSIS, deskt
 - Clique em regiões com links e ações do PDF: não devem abrir sites, anexos ou executar ações. Os controles do aplicativo continuam funcionando.
 - Confira um PDF digitalizado: imagem legível, com indicação de ausência de texto quando aplicável. Confira temas, janela mínima e uso totalmente offline.
 
+## Pausa com cobrinha (0.1.8)
+
+- Em uma questão com resposta em andamento, pausar, escolher 3 ou 5 minutos e iniciar a cobrinha. Conferir setas/WASD, frutas, colisão e nova rodada dentro do mesmo intervalo.
+- Clicar fora do tabuleiro ou alternar de janela: o jogo deve parar. Retomar pelo botão do jogo. Testar tema claro/escuro, F11 e monitor pequeno.
+- Trocar Descansar/Jogar cobrinha: o cronômetro não deve reiniciar. Ao chegar a zero, o jogo para e a sessão permanece pausada até retomar explicitamente.
+- Retomar antes/depois do prazo: resposta no site preservada e pausa não contabilizada como estudo. Repetir com PDF e verificar última página.
+- Abrir o planejador ou fechar durante a pausa descarta apenas o intervalo recreativo; a sessão de estudo permanece pausada.
+

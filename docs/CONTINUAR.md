@@ -1,6 +1,6 @@
 # Retomada do StudyRoom
 
-Atualizado em 10 de outubro de 2026. Projeto em desenvolvimento incremental.
+Atualizado em 12 de outubro de 2026. Projeto em desenvolvimento incremental.
 
 ## Implementado
 - Fase 1: navegador real, política de navegação, sessões, persistência e instalador Windows.
@@ -12,6 +12,8 @@ Atualizado em 10 de outubro de 2026. Projeto em desenvolvimento incremental.
 - SQLite migration 6; migrações de bancos v1, v2, v3, v4 e v5 cobertas por testes. Use 0.1.5 ou posterior após atualizar.
 
 ## Próxima etapa
+Windows 0.1.8 acrescenta descanso/cobrinha na pausa, com 3/5 minutos, teclado setas/WASD, parada na expiração e retomada explícita. Implementação local em StudyBreak.tsx e snake.ts, sem dependências ou alteração de schema. O intervalo é transitório da tela de pausa, não persiste ao ir ao planejador/reabrir. Dados reais do usuário não foram alterados.
+
 As funcionalidades previstas nas Fases 1 e 2 estão implementadas. Pesquisa e proposta da Fase 3 entregues em FASE-3.md. Continuam as validações de aceitação. Não ativar restrições globais automaticamente.
 
 Windows 0.1.7: modo imersivo por F11/ícone, saída por F11/Esc, faixa de 36 pixels, tempo/pausa/notas/encerramento, navegação sob Controles, compatível com sessões de PDF. Não altera schema nem dados, não ativa kiosk. 61 testes unitários e sete integrações Windows passaram. A captura enviada pelo usuário já mostra QConcursos autenticado em elite.qconcursos.com; persistência após reinício e resolução de questões ainda precisam de confirmação manual.

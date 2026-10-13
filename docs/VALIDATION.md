@@ -1,5 +1,15 @@
 # Validação
 
+## Versão 0.1.8 — cobrinha na pausa (12/10/2026)
+
+- Build TypeScript/Vite e 66 testes unitários passaram. Cinco novos testes cobrem direção reversa, crescimento, fruta fora do corpo, colisões, movimento para a posição liberada pela cauda e vitória com tabuleiro completo.
+- Os sete cenários Electron passaram no Windows (44,6 s). A integração cobre seleção de 3/5 minutos, movimento/setas, parada ao perder foco, expiração do intervalo com relógio simulado, tempo de estudo congelado e retomada com resposta e identidade da sessão preservadas.
+- Na primeira execução, o evento blur do botão de início se propagava ao tabuleiro e pausava o jogo imediatamente. Corrigido para pausar apenas quando o foco sai do tabuleiro; nova execução completa passou.
+- Captura test-results/study-break.png inspecionada em 1366×768, no modo imersivo. Testes reais de conta e aceitação em outros tamanhos/temas continuam no roteiro manual.
+- Jogo inteiramente local, sem dependências novas, rede, ranking ou persistência. Intervalo de pausa transitório; sair da tela ou reiniciar descarta esse intervalo. A sessão de estudo continua usando a persistência existente. Nenhuma migração ou limpeza de dados/cookies.
+- Entrega Windows 0.1.8; pacotes Linux continuam em 0.1.5. Docker não foi utilizado. Instalação interativa do novo pacote depende do usuário fechar o aplicativo e executar o instalador.
+- Instalador release/StudyRoom Setup 0.1.8.exe gerado com sucesso. SHA256 em release/SHA256SUMS-0.1.8.txt; versão do executável e conteúdo do ASAR conferidos.
+
 ## Versão 0.1.7 — modo imersivo para telas pequenas
 
 - F11 e botão de expandir alternam tela cheia durante o estudo. F11/Esc/ícone de recolher restauram a janela sem alterar a sessão. Cabeçalhos são substituídos por faixa de 36 pixels; Controles revela navegação/zoom/login, e anotações seguem disponíveis.

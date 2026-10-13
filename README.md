@@ -2,11 +2,13 @@
 Navegador desktop de estudos para Windows e Linux. Fase 1 implementada em Electron, React, TypeScript, Vite, Tailwind e SQLite local. O QConcursos verdadeiro é exibido por WebContentsView, sem iframe ou recriação de suas funcionalidades.
 
 ## Abrir no Windows
-Execute `release/StudyRoom Setup 0.1.7.exe` e siga o instalador. Para executar sem instalar, use `release/win-unpacked/StudyRoom.exe` mantendo toda a pasta junto.
+Execute `release/StudyRoom Setup 0.1.8.exe` e siga o instalador. Para executar sem instalar, use `release/win-unpacked/StudyRoom.exe` mantendo toda a pasta junto.
 
 Durante uma sessão, pressione **F11** ou clique no ícone de expandir para o modo imersivo. O site ou PDF ocupa a janela em tela cheia, com uma faixa de 36 pixels para o tempo, pausa, anotações e encerramento. **Controles** revela a navegação e o zoom. **F11** ou **Esc** volta à janela normal sem pausar ou encerrar o estudo.
 
 Esta distribuição de desenvolvimento não possui certificado comercial de assinatura. A instalação interativa deve ser validada antes de distribuir a terceiros.
+
+Na pausa, escolha **3 ou 5 minutos** e depois **Descansar** ou **Jogar cobrinha**. A cobrinha usa setas/WASD e pausa ao sair do tabuleiro ou trocar de janela. Ao acabar o intervalo, o jogo para; **Retomar meu estudo** continua a sessão quando você quiser. O intervalo não conta como estudo. O jogo é local, sem rede ou ranking. Seu cronômetro é temporário nesta tela: sair para o planejador ou fechar o aplicativo descarta o intervalo, mantendo a sessão de estudo pausada.
 
 1. Defina seu objetivo na primeira abertura.
 2. Clique em **Só começar por 5 minutos**, escolha uma duração ou um site autorizado.

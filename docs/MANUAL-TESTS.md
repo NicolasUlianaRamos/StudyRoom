@@ -74,3 +74,16 @@ Login real, CAPTCHA, questões autenticadas, instalação interativa NSIS, deskt
 - Retomar antes/depois do prazo: resposta no site preservada e pausa não contabilizada como estudo. Repetir com PDF e verificar última página.
 - Abrir o planejador ou fechar durante a pausa descarta apenas o intervalo recreativo; a sessão de estudo permanece pausada.
 
+## Labirinto na pausa (0.1.9)
+
+- Selecionar Jogar Pac-Man, iniciar e usar setas/WASD. Viradas solicitadas antes da esquina devem acontecer quando o caminho estiver livre. Paredes impedem passagem.
+- Coletar pastilhas, capturar fantasmas após uma pastilha grande, perder vidas e reiniciar ao esgotá-las. Nova rodada mantém o mesmo prazo da pausa.
+- Alternar janela, notas e outras atividades: jogo para ao perder foco. Trocar entre cobrinha e labirinto não reinicia o intervalo. Sair do labirinto descarta sua rodada.
+- Ao expirar, verificar jogo parado, estudo ainda pausado e retorno explícito. Conferir F11, temas e monitor pequeno.
+
+
+
+## Labirinto clássico (0.1.10)
+- Conferir contornos azuis contínuos, simetria, quatro fantasmas e tamanho confortável no monitor.
+- Atravessar os túneis laterais nos dois sentidos. A porta rosa permite a saída dos fantasmas e impede a entrada do jogador.
+- Conferir setas/WASD, pastilhas, perda de vida, prazo compartilhado da pausa e retorno ao estudo.

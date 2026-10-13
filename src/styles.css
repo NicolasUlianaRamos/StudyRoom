@@ -1255,3 +1255,40 @@ th {
     width: 260px;
   }
 }
+.maze-board {
+  aspect-ratio: 28 / 31;
+  border-radius: 8px;
+  background: #050509;
+  background-image: none;
+}
+.maze-wall {
+  fill: none;
+  stroke: #333dff;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.maze-dot {
+  fill: #e8ddaf;
+}
+.maze-panel > small {
+  line-height: 1.5;
+}
+
+.maze-gate {
+  stroke: #ffb8de;
+  stroke-width: 3;
+}
+.maze-panel {
+  width: min(390px, 100%);
+}
+@media (max-height: 650px) and (min-width: 801px) {
+  .maze-panel {
+    width: min(330px, calc((100vh - 210px) * 28 / 31));
+  }
+}
+@media (max-width: 800px) {
+  .maze-panel {
+    width: min(340px, 100%);
+  }
+}

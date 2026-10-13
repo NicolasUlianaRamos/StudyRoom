@@ -1,6 +1,6 @@
 # Retomada do StudyRoom
 
-Atualizado em 12 de outubro de 2026. Projeto em desenvolvimento incremental.
+Atualizado em 13 de outubro de 2026. Projeto em desenvolvimento incremental.
 
 ## Implementado
 - Fase 1: navegador real, política de navegação, sessões, persistência e instalador Windows.
@@ -12,6 +12,9 @@ Atualizado em 12 de outubro de 2026. Projeto em desenvolvimento incremental.
 - SQLite migration 6; migrações de bancos v1, v2, v3, v4 e v5 cobertas por testes. Use 0.1.5 ou posterior após atualizar.
 
 ## Próxima etapa
+Windows 0.1.10 refaz o labirinto para aproximar o visual clássico: 28 × 31 simétrico, paredes azuis contínuas sobre preto, casa com porta exclusiva para fantasmas, quatro fantasmas e túneis laterais. Sem alteração de dados ou schema.
+Windows 0.1.9 acrescenta Pac-Man/Labirinto à pausa: mapa próprio, pastilhas normais/especiais, dois fantasmas e três vidas. Usa MazeBreak.tsx/maze.ts. Compartilha o prazo da pausa com a cobrinha, congela por perda de foco/expiração e não altera dados do usuário. Sem dependências novas ou Docker.
+
 Windows 0.1.8 acrescenta descanso/cobrinha na pausa, com 3/5 minutos, teclado setas/WASD, parada na expiração e retomada explícita. Implementação local em StudyBreak.tsx e snake.ts, sem dependências ou alteração de schema. O intervalo é transitório da tela de pausa, não persiste ao ir ao planejador/reabrir. Dados reais do usuário não foram alterados.
 
 As funcionalidades previstas nas Fases 1 e 2 estão implementadas. Pesquisa e proposta da Fase 3 entregues em FASE-3.md. Continuam as validações de aceitação. Não ativar restrições globais automaticamente.

@@ -1,5 +1,21 @@
 # Validação
 
+## Versão 0.1.10 — labirinto clássico (13/10/2026)
+- Planta simétrica 28 × 31, contornos contínuos azuis, quatro fantasmas, casa central com porta e túnel lateral bidirecional.
+- 73 testes passaram na suíte completa; após corrigir o cenário de saída da casa para evitar colisões durante a verificação, os oito testes do labirinto passaram. Cobrem simetria, acessibilidade, túnel, porta, saída dos fantasmas, movimento, colisões, poderes e vitória.
+- Build TypeScript/Vite aprovado. Captura real da pausa em test-results/maze-break.png inspecionada a 1366 × 768.
+- Dados reais e instalação do usuário preservados; sem nova dependência, migração ou Docker.
+
+
+## Versão 0.1.9 — labirinto inspirado no Pac-Man (13/10/2026)
+
+- Mapa e desenhos SVG próprios, duas rotinas de fantasmas, três vidas, pastilhas especiais, pontuação e vitória ao limpar o mapa. Inteiramente local, sem novas dependências ou mudanças no banco.
+- Build TypeScript/Vite aprovado. Os 66 testes anteriores passaram e os sete novos testes de maze.test.ts passaram após corrigir uma linha do mapa com uma coluna extra. Cobrem acessibilidade de todas as pastilhas/fantasmas, paredes, curvas, pontuação, vidas, colisão durante movimento do fantasma, poder temporário e vitória.
+- Sete cenários Electron aprovados. A integração exercita troca da cobrinha para o labirinto sem reiniciar o intervalo, movimento, comando WASD, pausa ao perder foco, expiração com relógio simulado, estudo ainda pausado e retorno com resposta preservada.
+- Captura test-results/maze-break.png inspecionada em 1366×768 no modo imersivo. Aceitação em outros monitores/temas consta no roteiro manual.
+- O labirinto descarta sua rodada ao escolher outra atividade; o prazo compartilhado permanece. Ao acabar a pausa, não retoma estudo automaticamente. Dados e login reais não foram alterados. Docker não utilizado; pacotes Linux permanecem em 0.1.5.
+- Instalador Windows release/StudyRoom Setup 0.1.9.exe gerado. Versão e presença do jogo no ASAR conferidas; SHA256 em release/SHA256SUMS-0.1.9.txt. A instalação atual do usuário não foi modificada automaticamente.
+
 ## Versão 0.1.8 — cobrinha na pausa (12/10/2026)
 
 - Build TypeScript/Vite e 66 testes unitários passaram. Cinco novos testes cobrem direção reversa, crescimento, fruta fora do corpo, colisões, movimento para a posição liberada pela cauda e vitória com tabuleiro completo.
@@ -140,3 +156,5 @@ SHA-256 do instalador:
 `E306FB08E31C633AA8362951664BF76831A4DACC834384820077D1604E5E46D9`
 
 O carregamento da página pública não substitui os critérios de aceitação autenticados. Consulte MANUAL-TESTS.md.
+
+Validação final 0.1.10: sete cenários Electron passaram (43,7 s). Instalador gerado e versão 0.1.10 conferida. HTML empacotado aponta ao bundle com o novo mapa. SHA256 em release/SHA256SUMS-0.1.10.txt. Instalação manual pelo usuário.

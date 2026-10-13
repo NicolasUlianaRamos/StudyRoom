@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Coffee, Gamepad2, Play } from 'lucide-react';
 import { duration } from './components';
 import { BOARD, newSnake, stepSnake, type Direction } from './snake';
+import { MazeBreak } from './MazeBreak';
 
 export function StudyBreak({
   resume,
@@ -17,7 +18,7 @@ export function StudyBreak({
   const [minutes, setMinutes] = useState(3);
   const [deadline, setDeadline] = useState<number | null>(null);
   const [now, setNow] = useState(Date.now);
-  const [mode, setMode] = useState<'rest' | 'snake' | null>(null);
+  const [mode, setMode] = useState<'rest' | 'snake' | 'maze' | null>(null);
   const [game, setGame] = useState(newSnake);
   const [playing, setPlaying] = useState(false);
   const direction = useRef<Direction>('right');
@@ -45,7 +46,7 @@ export function StudyBreak({
     }, 160);
     return () => window.clearInterval(timer);
   }, [playing, game.over, mode, expired, suspended, deadline]);
-  function choose(value: 'rest' | 'snake') {
+  function choose(value: 'rest' | 'snake' | 'maze') {
     if (deadline === null) {
       const start = Date.now();
       setNow(start);
@@ -113,6 +114,13 @@ export function StudyBreak({
               <Gamepad2 size={17} />
               Jogar cobrinha
             </button>
+            <button
+              className="secondary"
+              aria-pressed={mode === 'maze'}
+              onClick={() => choose('maze')}
+            >
+              <Gamepad2 size={17} /> Jogar Pac-Man
+            </button>
           </div>
         )}
         {mode === 'rest' && !expired && (
@@ -127,6 +135,9 @@ export function StudyBreak({
           Abrir planejador
         </button>
       </div>
+      {mode === 'maze' && deadline !== null && (
+        <MazeBreak deadline={deadline} expired={expired} suspended={suspended} />
+      )}
       {mode === 'snake' && (
         <div className="snake-panel">
           <div className="snake-heading">

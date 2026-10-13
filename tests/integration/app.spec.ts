@@ -308,6 +308,26 @@ test('aplicativo real: onboarding, persistência, navegador, redirecionamentos, 
   expect(await page.locator('.snake-head').getAttribute('y')).toBe(stopped);
   await page.getByRole('button', { name: 'Continuar jogo', exact: true }).click();
   await page.screenshot({ path: 'test-results/study-break.png' });
+  const breakTime = await page.getByRole('timer').textContent();
+  await page.getByRole('button', { name: 'Jogar Pac-Man', exact: true }).click();
+  await expect(page.locator('.maze-board')).toBeVisible();
+  // Escolher outro jogo conserva o intervalo já iniciado.
+  expect(await page.getByRole('timer').textContent()).not.toBe('03:00');
+  expect(breakTime).not.toBe('03:00');
+  await page.getByRole('button', { name: 'Continuar jogo', exact: true }).click();
+  await expect
+    .poll(() => page.locator('.maze-player').getAttribute('transform'))
+    .not.toContain('translate(270 470)');
+  await page.locator('.maze-board').press('d');
+  await expect
+    .poll(() => page.locator('.maze-player').getAttribute('transform'))
+    .toContain('rotate(0)');
+  await page.getByRole('timer').click();
+  const mazeStopped = await page.locator('.maze-player').getAttribute('transform');
+  await page.waitForTimeout(350);
+  expect(await page.locator('.maze-player').getAttribute('transform')).toBe(mazeStopped);
+  await page.getByRole('button', { name: 'Continuar jogo', exact: true }).click();
+  await page.screenshot({ path: 'test-results/maze-break.png' });
   await page.clock.setSystemTime(new Date(Date.now() + 181_000));
   await expect(page.getByRole('status')).toHaveText('Pausa concluída. Vamos voltar ao estudo?');
   await expect(page.getByRole('timer')).toHaveText('00:00');

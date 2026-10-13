@@ -2,11 +2,13 @@
 Navegador desktop de estudos para Windows e Linux. Fase 1 implementada em Electron, React, TypeScript, Vite, Tailwind e SQLite local. O QConcursos verdadeiro é exibido por WebContentsView, sem iframe ou recriação de suas funcionalidades.
 
 ## Abrir no Windows
-Execute `release/StudyRoom Setup 0.1.7.exe` e siga o instalador. Para executar sem instalar, use `release/win-unpacked/StudyRoom.exe` mantendo toda a pasta junto.
+Execute `release/StudyRoom Setup 0.1.10.exe` e siga o instalador. Para executar sem instalar, use `release/win-unpacked/StudyRoom.exe` mantendo toda a pasta junto.
 
 Durante uma sessão, pressione **F11** ou clique no ícone de expandir para o modo imersivo. O site ou PDF ocupa a janela em tela cheia, com uma faixa de 36 pixels para o tempo, pausa, anotações e encerramento. **Controles** revela a navegação e o zoom. **F11** ou **Esc** volta à janela normal sem pausar ou encerrar o estudo.
 
 Esta distribuição de desenvolvimento não possui certificado comercial de assinatura. A instalação interativa deve ser validada antes de distribuir a terceiros.
+
+Na pausa, escolha **3 ou 5 minutos** e depois **Descansar**, **Jogar cobrinha** ou **Jogar Pac-Man**. Os jogos usam setas/WASD e pausam ao sair do tabuleiro ou trocar de janela. O labirinto inspirado no Pac-Man tem planta simétrica de 28 × 31, paredes azuis contínuas, túneis laterais, casa central, quatro fantasmas, três vidas e pastilhas especiais que permitem capturá-los temporariamente. Ao acabar o intervalo, o jogo para; **Retomar meu estudo** continua a sessão quando você quiser. Trocar de jogo não reinicia o intervalo, que não conta como estudo. Os jogos são locais, sem rede ou ranking. O cronômetro é temporário nesta tela: sair para o planejador ou fechar o aplicativo descarta o intervalo, mantendo a sessão de estudo pausada. Sair do labirinto para outra atividade descarta sua rodada.
 
 1. Defina seu objetivo na primeira abertura.
 2. Clique em **Só começar por 5 minutos**, escolha uma duração ou um site autorizado.

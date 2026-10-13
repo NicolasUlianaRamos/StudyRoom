@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Notes } from './Notes';
 import { PdfReader } from './PdfReader';
+import { StudyBreak } from './StudyBreak';
 import type { Snapshot } from './shared';
 import { duration, IconButton, type Run } from './components';
 export function Focus({
@@ -254,32 +255,16 @@ export function Focus({
               </div>
             </div>
           ) : active?.status === 'paused' ? (
-            <div className="focus-message">
-              <span className="message-icon">
-                <Pause size={32} />
-              </span>
-              <h1>Uma pausa também faz parte.</h1>
-              <button className="secondary" onClick={plan}>
-                Abrir planejador
-              </button>
-              <p>O tempo de estudo está pausado. Respire e retome quando quiser.</p>
-              {state.recovered && (
-                <p className="notice">
-                  Sua sessão foi recuperada em segurança. O tempo com o aplicativo fechado não foi
-                  contabilizado.
-                </p>
-              )}
-              <button
-                className="primary"
-                onClick={async () => {
-                  if (!active?.pdfId && !state.browser.domain)
-                    await run({ type: 'navigate', url: state.settings.lastUrl });
-                  await run({ type: 'resume' });
-                }}
-              >
-                Retomar meu estudo <Play size={17} />
-              </button>
-            </div>
+            <StudyBreak
+              recovered={state.recovered}
+              suspended={state.exitReadyAt !== null}
+              plan={plan}
+              resume={async () => {
+                if (!active?.pdfId && !state.browser.domain)
+                  await run({ type: 'navigate', url: state.settings.lastUrl });
+                await run({ type: 'resume' });
+              }}
+            />
           ) : !active?.pdfId && remote.blocked ? (
             <div className="focus-message">
               <span className="message-icon">

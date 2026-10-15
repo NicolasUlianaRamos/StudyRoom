@@ -469,6 +469,8 @@ test('aplicativo real: onboarding, persistência, navegador, redirecionamentos, 
 
 test('recupera sessão após saída abrupta e preserva isolamento e limites de layout', async () => {
   await page.getByRole('button', { name: 'Só começar por 5 minutos' }).click();
+  // O click termina antes do comando de início e da montagem da tela de foco.
+  await expect(page.getByRole('button', { name: 'Pausar', exact: true })).toBeVisible();
   await page.evaluate((url) => window.studyroom.command({ type: 'navigate', url }), origin + '/');
   await expect.poll(remoteUrl).toContain(origin);
   await remote("localStorage.setItem('studyroom-test','persisted')");
@@ -521,21 +523,25 @@ test('anotações e Ver depois: autosave, painel nativo, pesquisa, exportação 
   await page.evaluate((url) => window.studyroom.command({ type: 'navigate', url }), origin + '/');
   await page.getByRole('button', { name: 'Retomar', exact: true }).click();
   await expect.poll(remoteUrl).toContain(origin);
-  // A navegação termina antes do ResizeObserver enviar os limites da view nativa.
-  await expect.poll(async () => (await viewBounds()).bounds.width).toBeGreaterThan(0);
-  const fullWidth = await app.evaluate(
-    ({ BrowserWindow }) =>
-      BrowserWindow.getAllWindows()[0].contentView.children[0].getBounds().width,
-  );
+  // Capture no próprio poll a medida aceita, sem reler durante uma troca de layout.
+  await expect(page.getByRole('button', { name: 'Pausar', exact: true })).toBeVisible();
+  let fullWidth = 0;
+  await expect
+    .poll(async () => {
+      const area = await page.locator('.browser-area').boundingBox();
+      const native = (await viewBounds()).bounds;
+      if (!area || area.width <= 0 || native.width !== Math.round(area.width)) return false;
+      fullWidth = native.width;
+      return fullWidth > 0;
+    })
+    .toBe(true);
   await page.getByRole('button', { name: 'Anotações', exact: true }).click();
   await expect
-    .poll(() =>
-      app.evaluate(
-        ({ BrowserWindow }) =>
-          BrowserWindow.getAllWindows()[0].contentView.children[0].getBounds().width,
-      ),
-    )
-    .toBeLessThan(fullWidth);
+    .poll(async () => {
+      const width = (await viewBounds()).bounds.width;
+      return width > 0 && width < fullWidth;
+    })
+    .toBe(true);
   await page.getByRole('button', { name: 'Ver depois', exact: true }).click();
   await page.getByLabel('Título', { exact: true }).fill('Pesquisar depois');
   await page.getByLabel('Matéria (opcional)').fill('Engenharia');

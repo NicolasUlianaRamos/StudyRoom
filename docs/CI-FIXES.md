@@ -33,3 +33,11 @@ Na execução seguinte, ambos os jobs de pull_request passaram. No push, Windows
 - O teste do PDF aguarda os controles da sessão de estudo; o estado de página carregada também existe no leitor da biblioteca e, sozinho, não indica que a tela de estudo está pronta. Mantém F11 e as verificações nativa e visual de tela cheia.
 
 Validação: TypeScript e sete integrações Windows passaram (46 s). A confirmação do comportamento Wayland depende da próxima execução remota. Apenas empacotamento e testes alterados; dados reais preservados.
+
+## Wayland: entrada nativa no compositor de teste
+
+O commit 653d1d6 passou no Windows, mas a espera por foco nativo falhou no Weston headless. Esse backend não fornece entrada de teclado/mouse; exigir foco nele tornou a falha determinística.
+
+O script Wayland agora executa Weston com backend X11 dentro de Xvfb/Openbox, ativa a janela do compositor e verifica a presença de wl_seat antes de iniciar os testes. Electron continua explicitamente em --ozone-platform=wayland, sem XWayland. Mantém todas as asserções de foco, entrega de F11/Escape e tela cheia. O workflow instala xdotool e wayland-utils para preparar e diagnosticar o ambiente.
+
+Validação remota pendente; não considerar resolvido apenas com testes Windows.

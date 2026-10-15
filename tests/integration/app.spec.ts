@@ -434,6 +434,7 @@ test('aplicativo real: onboarding, persistência, navegador, redirecionamentos, 
   await expect(page.locator('.topbar')).toBeVisible();
   await expect.poll(async () => (await viewBounds()).bounds.y).toBeGreaterThan(100);
   await localKey('F11');
+  await expect.poll(async () => (await viewBounds()).fullscreen).toBe(true);
   await expect(
     page.getByRole('button', { name: 'Sair do modo imersivo (F11 ou Esc)', exact: true }),
   ).toBeVisible();

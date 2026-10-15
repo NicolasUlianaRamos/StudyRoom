@@ -521,6 +521,8 @@ test('anotações e Ver depois: autosave, painel nativo, pesquisa, exportação 
   await page.evaluate((url) => window.studyroom.command({ type: 'navigate', url }), origin + '/');
   await page.getByRole('button', { name: 'Retomar', exact: true }).click();
   await expect.poll(remoteUrl).toContain(origin);
+  // A navegação termina antes do ResizeObserver enviar os limites da view nativa.
+  await expect.poll(async () => (await viewBounds()).bounds.width).toBeGreaterThan(0);
   const fullWidth = await app.evaluate(
     ({ BrowserWindow }) =>
       BrowserWindow.getAllWindows()[0].contentView.children[0].getBounds().width,

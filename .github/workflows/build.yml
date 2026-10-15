@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest, macos-15, macos-15-intel]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     steps:
@@ -25,8 +25,8 @@ jobs:
       - name: Install Linux test desktops
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends xvfb x11-utils openbox weston xdotool wayland-utils
-      - name: Electron integration (Windows)
-        if: runner.os == 'Windows'
+      - name: Electron integration (Windows and macOS)
+        if: runner.os != 'Linux'
         run: npm run test:integration
       - name: Electron integration (Linux X11)
         if: runner.os == 'Linux'
@@ -45,7 +45,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: StudyRoom-${{ runner.os }}-diagnostics
+          name: StudyRoom-${{ matrix.os }}-diagnostics
           path: test-results/
           if-no-files-found: ignore
       - name: Package Windows
@@ -56,11 +56,21 @@ jobs:
       - name: Package Linux
         if: runner.os == 'Linux'
         run: npm run dist:linux
+      - name: Package macOS
+        if: runner.os == 'macOS'
+        run: npm run dist:mac
+      - name: Smoke test packaged app (Windows and macOS)
+        if: runner.os != 'Linux'
+        run: node scripts/package-smoke.mjs
+      - name: Smoke test packaged app (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum sh scripts/x11-test.sh node scripts/package-smoke.mjs
       - uses: actions/upload-artifact@v4
         with:
-          name: StudyRoom-${{ runner.os }}
+          name: StudyRoom-${{ matrix.os }}
           path: |
             release/*.exe
             release/*.AppImage
             release/*.deb
+            release/*.dmg
           if-no-files-found: error

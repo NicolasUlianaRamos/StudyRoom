@@ -1,6 +1,6 @@
 import { WebContentsView, type BrowserWindow, type Session } from 'electron';
 import type { BrowserState, Site } from '../src/shared';
-import { allowed, domainOnly, frameAllowed, HOME, trustedAuth } from './policy';
+import { allowed, domainOnly, frameAllowed, HOME, trustedAuth, authEntry } from './policy';
 export class StudyBrowser {
   view: WebContentsView;
   wanted = false;
@@ -62,25 +62,27 @@ export class StudyBrowser {
     });
     const wc = this.view.webContents;
     wc.on('will-navigate', (event, url) => {
-      if (!this.permitted(url)) {
+      if (!this.navigationPermitted(url)) {
         event.preventDefault();
         this.block(url);
       }
     });
     wc.on('will-frame-navigate', (event) => {
-      if (!(event.isMainFrame ? this.permitted(event.url) : this.framePermitted(event.url))) {
+      if (
+        !(event.isMainFrame ? this.navigationPermitted(event.url) : this.framePermitted(event.url))
+      ) {
         event.preventDefault();
         if (event.isMainFrame) this.block(event.url);
       }
     });
     wc.on('will-redirect', (event, url, _inPlace, isMainFrame) => {
-      if (!(isMainFrame ? this.permitted(url) : this.framePermitted(url))) {
+      if (!(isMainFrame ? this.navigationPermitted(url) : this.framePermitted(url))) {
         event.preventDefault();
         if (isMainFrame) this.block(url);
       }
     });
     wc.setWindowOpenHandler(({ url }) => {
-      if (this.permitted(url)) setImmediate(() => this.navigate(url));
+      if (this.navigationPermitted(url)) setImmediate(() => this.navigate(url));
       else this.block(url);
       return { action: 'deny' };
     });
@@ -96,7 +98,7 @@ export class StudyBrowser {
     const navigated = () => {
       const url = wc.getURL();
       this.state.domain = domainOnly(url);
-      if (allowed(url, this.sites())) {
+      if (this.studyPage(url)) {
         this.state.authUntil = 0;
         this.remember(url);
       }
@@ -129,7 +131,16 @@ export class StudyBrowser {
     });
     window.on('resize', () => this.layout());
   }
-  permitted(url: string) {
+  private navigationPermitted(url: string) {
+    const source = this.view.webContents.getURL();
+    // Autoriza apenas navegação principal iniciada pelo site de estudos atual.
+    // Não renova o prazo quando o usuário já está no provedor de login.
+    if (this.studyPage(source) && authEntry(url)) {
+      if (this.state.authUntil <= Date.now()) this.state.authUntil = Date.now() + 5 * 60000;
+    }
+    return this.permitted(url);
+  }
+  private studyPage(url: string) {
     if (this.fixtureOrigin) {
       try {
         if (new URL(url).origin === this.fixtureOrigin) return true;
@@ -137,7 +148,10 @@ export class StudyBrowser {
         /* deny */
       }
     }
-    return allowed(url, this.sites()) || trustedAuth(url, this.state.authUntil);
+    return allowed(url, this.sites());
+  }
+  permitted(url: string) {
+    return this.studyPage(url) || trustedAuth(url, this.state.authUntil);
   }
   private framePermitted(url: string) {
     return this.permitted(url) || frameAllowed(url, this.sites(), this.state.authUntil);
@@ -229,8 +243,6 @@ export class StudyBrowser {
         Math.max(0.5, this.state.zoom + (action === 'zoomIn' ? 0.1 : -0.1)),
       );
       wc.setZoomFactor(this.state.zoom);
-    } else if (action === 'auth') {
-      this.state.authUntil = Date.now() + 5 * 60000;
     }
     this.refresh();
   }

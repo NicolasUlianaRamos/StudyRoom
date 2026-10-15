@@ -112,7 +112,7 @@ export type Command =
   | { type: 'navigate'; url: string }
   | {
       type: 'browser';
-      action: 'back' | 'forward' | 'reload' | 'home' | 'return' | 'zoomIn' | 'zoomOut' | 'auth';
+      action: 'back' | 'forward' | 'reload' | 'home' | 'return' | 'zoomIn' | 'zoomOut';
     }
   | {
       type: 'view';

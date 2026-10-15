@@ -63,6 +63,13 @@ export function trustedAuth(raw: string, until: number, now = Date.now()): boole
     )
   );
 }
+// Somente rotas de entrada podem iniciar uma autorização; cookies são continuação.
+export function authEntry(raw: string): boolean {
+  if (!trustedAuth(raw, 1, 0)) return false;
+  return /^\/(?:o\/oauth2(?:\/|$)|v3\/signin(?:\/|$)|signin(?:\/|$)|ServiceLogin(?:\/|$))/.test(
+    new URL(raw).pathname,
+  );
+}
 export function frameAllowed(raw: string, sites: Site[], authUntil = 0): boolean {
   if (allowed(raw, sites) || trustedAuth(raw, authUntil)) return true;
   const u = parseSafeUrl(raw);

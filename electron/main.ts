@@ -309,11 +309,7 @@ async function command(c: Command) {
       browser.navigate(text(c.url));
       break;
     case 'browser':
-      if (
-        !['back', 'forward', 'reload', 'home', 'return', 'zoomIn', 'zoomOut', 'auth'].includes(
-          c.action,
-        )
-      )
+      if (!['back', 'forward', 'reload', 'home', 'return', 'zoomIn', 'zoomOut'].includes(c.action))
         throw new Error('Ação inválida.');
       browser.action(c.action);
       break;

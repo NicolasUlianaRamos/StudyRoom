@@ -52,6 +52,18 @@ async function launch() {
     ],
     env,
   });
+  await app.evaluate(({ BrowserWindow }) => {
+    const win = BrowserWindow.getAllWindows()[0] as Electron.BrowserWindow & {
+      testFullscreen?: boolean;
+    };
+    win.testFullscreen = win.isFullScreen();
+    win.on('enter-full-screen', () => {
+      win.testFullscreen = true;
+    });
+    win.on('leave-full-screen', () => {
+      win.testFullscreen = false;
+    });
+  });
   appProcess = app.process();
   appRunning = true;
   page = await app.firstWindow();
@@ -91,11 +103,15 @@ async function remoteKey(key: string) {
 }
 async function viewBounds() {
   return app.evaluate(({ BrowserWindow }) => {
-    const win = BrowserWindow.getAllWindows()[0];
+    const win = BrowserWindow.getAllWindows()[0] as Electron.BrowserWindow & {
+      testFullscreen?: boolean;
+    };
+    const native = win.isFullScreen();
     return {
       bounds: win.contentView.children[0].getBounds(),
       size: win.getContentSize(),
-      fullscreen: win.isFullScreen(),
+      // No macOS, aguarde também o evento que encerra a animação do Space.
+      fullscreen: process.platform === 'darwin' && native !== win.testFullscreen ? null : native,
     };
   });
 }
@@ -159,6 +175,8 @@ test.afterAll(async () => {
 });
 
 test('aplicativo real: onboarding, persistência, navegador, redirecionamentos, popups e isolamento', async () => {
+  // Inclui primeira inicialização e várias transições de Spaces no runner Mac.
+  if (process.platform === 'darwin') test.setTimeout(120000);
   await launch();
   await page.getByRole('button', { name: 'Preparar meu espaço' }).click();
   await page.getByRole('button', { name: 'Sites e preferências', exact: true }).click();

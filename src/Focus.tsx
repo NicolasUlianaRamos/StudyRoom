@@ -217,13 +217,6 @@ export function Focus({
             >
               <Plus size={16} />
             </IconButton>
-            <button
-              className="text-button auth-button"
-              title="Autoriza por 5 minutos apenas rotas de autenticação de accounts.google.com e accounts.google.com.br. Depois, use o botão de login no site. Provedores podem recusar navegadores incorporados."
-              onClick={() => void run({ type: 'browser', action: 'auth' })}
-            >
-              {remote.authUntil > state.now ? 'Login Google: 5 min' : 'Autorizar login Google'}
-            </button>
           </>
         )}
       </div>

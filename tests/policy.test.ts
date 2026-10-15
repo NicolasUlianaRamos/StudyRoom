@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { allowed, frameAllowed, parseSafeUrl, trustedAuth, domainOnly } from '../electron/policy';
+import {
+  authEntry,
+  allowed,
+  frameAllowed,
+  parseSafeUrl,
+  trustedAuth,
+  domainOnly,
+} from '../electron/policy';
 import type { Site } from '../src/shared';
 const sites: Site[] = [
   { id: 1, name: 'QConcursos', url: 'https://qconcursos.com/', enabled: true, subdomains: true },
@@ -35,6 +42,20 @@ describe('política de navegação', () => {
     expect(frameAllowed('https://challenges.cloudflare.com/turnstile', sites)).toBe(true);
     expect(allowed('https://challenges.cloudflare.com', sites)).toBe(false);
     expect(frameAllowed('https://youtube.com/embed/a', sites)).toBe(false);
+  });
+  it('só inicia login por rotas de entrada, nunca por cookies ou serviços gerais', () => {
+    for (const path of ['/o/oauth2/v2/auth', '/v3/signin/identifier', '/ServiceLogin']) {
+      expect(authEntry('https://accounts.google.com' + path)).toBe(true);
+    }
+    for (const url of [
+      'https://accounts.google.com/accounts/SetSID',
+      'https://accounts.google.com/CheckCookie',
+      'https://accounts.google.com/search',
+      'https://accounts.google.com.evil.com/o/oauth2/v2/auth',
+      'http://accounts.google.com/o/oauth2/v2/auth',
+      'https://mail.google.com/',
+    ])
+      expect(authEntry(url)).toBe(false);
   });
   it('limita autenticação a origem, caminho e janela temporal', () => {
     expect(trustedAuth('https://accounts.google.com/o/oauth2/v2/auth', 200, 100)).toBe(true);

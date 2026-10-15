@@ -646,10 +646,6 @@ th {
   color: var(--muted);
   margin: 0 auto;
 }
-.auth-button {
-  font-size: 10px;
-  padding: 8px;
-}
 .browser-bar[hidden] {
   display: none;
 }
@@ -876,9 +872,6 @@ th {
   }
   .focus-header {
     gap: 12px;
-  }
-  .auth-button {
-    max-width: 140px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

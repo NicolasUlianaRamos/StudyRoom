@@ -227,13 +227,10 @@ test('aplicativo real: onboarding, persistência, navegador, redirecionamentos, 
       page.getByText('Este site não faz parte do seu ambiente de estudos.'),
     ).toBeVisible();
     await page.getByRole('button', { name: 'Voltar ao estudo', exact: true }).click();
-    await page.getByRole('button', { name: 'Autorizar login Google', exact: true }).click();
-    await page.evaluate(() =>
-      window.studyroom.command({
-        type: 'navigate',
-        url: 'https://accounts.google.com/v3/signin/identifier',
-      }),
-    );
+    await expect(
+      page.getByRole('button', { name: 'Autorizar login Google', exact: true }),
+    ).toHaveCount(0);
+    await remote("location.href='https://accounts.google.com/v3/signin/identifier'");
     await expect
       .poll(() =>
         app.evaluate(({ webContents }) =>
@@ -276,6 +273,35 @@ test('aplicativo real: onboarding, persistência, navegador, redirecionamentos, 
       page.getByText('Este site não faz parte do seu ambiente de estudos.'),
     ).toBeVisible();
     await page.getByRole('button', { name: 'Voltar ao estudo', exact: true }).click();
+    await page.evaluate(
+      (url) => window.studyroom.command({ type: 'navigate', url }),
+      origin + '/popup',
+    );
+    await expect.poll(remoteUrl).toBe(origin + '/popup');
+    // O mesmo fluxo em popup deve reutilizar a view, sem abrir uma janela livre.
+    await remote("window.open('https://accounts.google.com/v3/signin/identifier', '_blank')");
+    await expect
+      .poll(
+        async () =>
+          (await page.evaluate(() => window.studyroom.command({ type: 'snapshot' }))).browser
+            .domain,
+      )
+      .toBe('accounts.google.com.br');
+    expect(await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(1);
+    await page.evaluate(() =>
+      window.studyroom.command({ type: 'navigate', url: 'https://mail.google.com/' }),
+    );
+    await expect(
+      page.getByText('Este site não faz parte do seu ambiente de estudos.'),
+    ).toBeVisible();
+    await page.evaluate(
+      (url) => window.studyroom.command({ type: 'navigate', url }),
+      origin + '/popup',
+    );
+    await expect.poll(remoteUrl).toBe(origin + '/popup');
+    expect(
+      (await page.evaluate(() => window.studyroom.command({ type: 'snapshot' }))).browser.authUntil,
+    ).toBe(0);
   } finally {
     await page.evaluate(
       (url) => window.studyroom.command({ type: 'navigate', url }),

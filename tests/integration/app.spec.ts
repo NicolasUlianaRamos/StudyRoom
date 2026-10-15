@@ -52,6 +52,9 @@ async function launch() {
     ],
     env,
   });
+  appProcess = app.process();
+  appRunning = true;
+  page = await app.firstWindow();
   await app.evaluate(({ BrowserWindow }) => {
     const win = BrowserWindow.getAllWindows()[0] as Electron.BrowserWindow & {
       testFullscreen?: boolean;
@@ -64,9 +67,6 @@ async function launch() {
       win.testFullscreen = false;
     });
   });
-  appProcess = app.process();
-  appRunning = true;
-  page = await app.firstWindow();
   await expect(page.getByRole('heading', { name: 'Um passo de cada vez.' })).toBeVisible();
 }
 async function remote(script: string) {

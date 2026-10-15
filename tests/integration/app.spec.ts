@@ -55,6 +55,18 @@ async function launch() {
   appProcess = app.process();
   appRunning = true;
   page = await app.firstWindow();
+  await app.evaluate(({ BrowserWindow }) => {
+    const win = BrowserWindow.getAllWindows()[0] as Electron.BrowserWindow & {
+      testFullscreen?: boolean;
+    };
+    win.testFullscreen = win.isFullScreen();
+    win.on('enter-full-screen', () => {
+      win.testFullscreen = true;
+    });
+    win.on('leave-full-screen', () => {
+      win.testFullscreen = false;
+    });
+  });
   await expect(page.getByRole('heading', { name: 'Um passo de cada vez.' })).toBeVisible();
 }
 async function remote(script: string) {
@@ -91,11 +103,15 @@ async function remoteKey(key: string) {
 }
 async function viewBounds() {
   return app.evaluate(({ BrowserWindow }) => {
-    const win = BrowserWindow.getAllWindows()[0];
+    const win = BrowserWindow.getAllWindows()[0] as Electron.BrowserWindow & {
+      testFullscreen?: boolean;
+    };
+    const native = win.isFullScreen();
     return {
       bounds: win.contentView.children[0].getBounds(),
       size: win.getContentSize(),
-      fullscreen: win.isFullScreen(),
+      // No macOS, aguarde também o evento que encerra a animação do Space.
+      fullscreen: process.platform === 'darwin' && native !== win.testFullscreen ? null : native,
     };
   });
 }
@@ -159,6 +175,8 @@ test.afterAll(async () => {
 });
 
 test('aplicativo real: onboarding, persistência, navegador, redirecionamentos, popups e isolamento', async () => {
+  // Inclui primeira inicialização e várias transições de Spaces no runner Mac.
+  if (process.platform === 'darwin') test.setTimeout(120000);
   await launch();
   await page.getByRole('button', { name: 'Preparar meu espaço' }).click();
   await page.getByRole('button', { name: 'Sites e preferências', exact: true }).click();
@@ -416,6 +434,7 @@ test('aplicativo real: onboarding, persistência, navegador, redirecionamentos, 
   await expect(page.locator('.topbar')).toBeVisible();
   await expect.poll(async () => (await viewBounds()).bounds.y).toBeGreaterThan(100);
   await localKey('F11');
+  await expect.poll(async () => (await viewBounds()).fullscreen).toBe(true);
   await expect(
     page.getByRole('button', { name: 'Sair do modo imersivo (F11 ou Esc)', exact: true }),
   ).toBeVisible();
@@ -469,6 +488,8 @@ test('aplicativo real: onboarding, persistência, navegador, redirecionamentos, 
 
 test('recupera sessão após saída abrupta e preserva isolamento e limites de layout', async () => {
   await page.getByRole('button', { name: 'Só começar por 5 minutos' }).click();
+  // O click termina antes do comando de início e da montagem da tela de foco.
+  await expect(page.getByRole('button', { name: 'Pausar', exact: true })).toBeVisible();
   await page.evaluate((url) => window.studyroom.command({ type: 'navigate', url }), origin + '/');
   await expect.poll(remoteUrl).toContain(origin);
   await remote("localStorage.setItem('studyroom-test','persisted')");
@@ -521,19 +542,25 @@ test('anotações e Ver depois: autosave, painel nativo, pesquisa, exportação 
   await page.evaluate((url) => window.studyroom.command({ type: 'navigate', url }), origin + '/');
   await page.getByRole('button', { name: 'Retomar', exact: true }).click();
   await expect.poll(remoteUrl).toContain(origin);
-  const fullWidth = await app.evaluate(
-    ({ BrowserWindow }) =>
-      BrowserWindow.getAllWindows()[0].contentView.children[0].getBounds().width,
-  );
+  // Capture no próprio poll a medida aceita, sem reler durante uma troca de layout.
+  await expect(page.getByRole('button', { name: 'Pausar', exact: true })).toBeVisible();
+  let fullWidth = 0;
+  await expect
+    .poll(async () => {
+      const area = await page.locator('.browser-area').boundingBox();
+      const native = (await viewBounds()).bounds;
+      if (!area || area.width <= 0 || native.width !== Math.round(area.width)) return false;
+      fullWidth = native.width;
+      return fullWidth > 0;
+    })
+    .toBe(true);
   await page.getByRole('button', { name: 'Anotações', exact: true }).click();
   await expect
-    .poll(() =>
-      app.evaluate(
-        ({ BrowserWindow }) =>
-          BrowserWindow.getAllWindows()[0].contentView.children[0].getBounds().width,
-      ),
-    )
-    .toBeLessThan(fullWidth);
+    .poll(async () => {
+      const width = (await viewBounds()).bounds.width;
+      return width > 0 && width < fullWidth;
+    })
+    .toBe(true);
   await page.getByRole('button', { name: 'Ver depois', exact: true }).click();
   await page.getByLabel('Título', { exact: true }).fill('Pesquisar depois');
   await page.getByLabel('Matéria (opcional)').fill('Engenharia');

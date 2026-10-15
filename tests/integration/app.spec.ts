@@ -11,6 +11,9 @@ import { pdfFixture } from '../pdf-fixture';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
+// Os cenários compartilham o perfil temporário e continuam a mesma jornada.
+// Interromper a sequência após uma falha evita erros em cascata.
+test.describe.configure({ mode: 'serial' });
 let server: Server;
 let origin: string;
 let data: string;
@@ -386,6 +389,10 @@ test('aplicativo real: onboarding, persistência, navegador, redirecionamentos, 
   });
   expect(rejected).toBe(true);
   await page.getByRole('button', { name: 'Modo imersivo (F11)', exact: true }).click();
+  await expect.poll(async () => (await viewBounds()).fullscreen).toBe(true);
+  await expect(
+    page.getByRole('button', { name: 'Sair do modo imersivo (F11 ou Esc)', exact: true }),
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Encerrar', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'Encerrar sessão' })).toBeVisible();
   await localKey('Escape');

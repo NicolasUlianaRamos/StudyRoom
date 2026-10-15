@@ -12,6 +12,7 @@ jobs:
       matrix:
         os: [windows-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -21,18 +22,32 @@ jobs:
       - run: npm ci
       - run: npm run test
       - run: npm run build
+      - name: Install Linux test desktops
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends xvfb x11-utils openbox weston
       - name: Electron integration (Windows)
         if: runner.os == 'Windows'
         run: npm run test:integration
       - name: Electron integration (Linux X11)
         if: runner.os == 'Linux'
-        run: xvfb-run --auto-servernum npm run test:integration
-      - name: Install Wayland test compositor
-        if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends weston
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1366x768x24" sh scripts/x11-test.sh npx playwright test
+      - name: Save X11 test diagnostics
+        if: failure() && runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: StudyRoom-X11-diagnostics
+          path: test-results/
+          if-no-files-found: ignore
       - name: Electron integration (Linux Wayland)
         if: runner.os == 'Linux'
         run: sh scripts/wayland-test.sh npx playwright test
+      - name: Save test diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: StudyRoom-${{ runner.os }}-diagnostics
+          path: test-results/
+          if-no-files-found: ignore
       - name: Package Windows
         if: runner.os == 'Windows'
         run: npm run dist:win

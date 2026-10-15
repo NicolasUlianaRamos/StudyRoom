@@ -23,3 +23,13 @@ No commit 5bafe0e, o Windows do pull request concluiu testes e instalador; Linux
 - O encerramento de testes retém a referência ao processo do Electron, evitando erro secundário ao consultar uma conexão Playwright já fechada.
 
 Correções ainda precisam de nova execução remota para confirmar Wayland.
+
+## Publicação implícita e foco de F11 no PDF
+
+Na execução seguinte, ambos os jobs de pull_request passaram. No push, Windows terminou de gerar o NSIS e falhou ao tentar publicar sem GH_TOKEN. Wayland passou nos seis primeiros cenários, mas o teste de PDF não entrou no modo imersivo após F11.
+
+- Scripts dist:win e dist:linux agora passam --publish never. O workflow continua entregando os instaladores como artifacts; não precisa de token de publicação.
+- O helper de teclado agora traz a página à frente, solicita foco na BrowserWindow e WebContents e aguarda confirmação antes de enviar a tecla. Confirma o evento before-input-event sem repetir F11. A documentação de tipos do Electron exige foco na janela para sendInputEvent.
+- O teste do PDF aguarda os controles da sessão de estudo; o estado de página carregada também existe no leitor da biblioteca e, sozinho, não indica que a tela de estudo está pronta. Mantém F11 e as verificações nativa e visual de tela cheia.
+
+Validação: TypeScript e sete integrações Windows passaram (46 s). A confirmação do comportamento Wayland depende da próxima execução remota. Apenas empacotamento e testes alterados; dados reais preservados.

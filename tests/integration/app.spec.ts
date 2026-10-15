@@ -100,10 +100,38 @@ async function viewBounds() {
   });
 }
 async function localKey(key: string) {
-  await app.evaluate(({ BrowserWindow }, key) => {
+  // sendInputEvent exige foco na janela nativa, além do WebContents.
+  await page.bringToFront();
+  await app.evaluate(({ BrowserWindow }) => {
+    const win = BrowserWindow.getAllWindows()[0];
+    win.focus();
+    win.webContents.focus();
+  });
+  await expect
+    .poll(() =>
+      app.evaluate(({ BrowserWindow }) => {
+        const win = BrowserWindow.getAllWindows()[0];
+        return win.isFocused() && win.webContents.isFocused();
+      }),
+    )
+    .toBe(true);
+  await app.evaluate(async ({ BrowserWindow }, key) => {
     const wc = BrowserWindow.getAllWindows()[0].webContents;
-    wc.focus();
-    wc.sendInputEvent({ type: 'keyDown', keyCode: key });
+    // Confirma entrega sem repetir F11, que poderia alternar duas vezes.
+    await new Promise<void>((resolve, reject) => {
+      const onInput = (_event: Electron.Event, input: Electron.Input) => {
+        if (input.type !== 'keyDown' || input.key !== key) return;
+        clearTimeout(timeout);
+        wc.removeListener('before-input-event', onInput);
+        resolve();
+      };
+      const timeout = setTimeout(() => {
+        wc.removeListener('before-input-event', onInput);
+        reject(new Error('Atalho não recebido pelo Electron: ' + key));
+      }, 5000);
+      wc.on('before-input-event', onInput);
+      wc.sendInputEvent({ type: 'keyDown', keyCode: key });
+    });
     wc.sendInputEvent({ type: 'keyUp', keyCode: key });
   }, key);
 }
@@ -912,6 +940,10 @@ test('PDF local: importação, renderização, retomada, foco, notas e remoção
   });
   const id = started.pdfs[0].id;
   await expect(page.getByText('Página carregada', { exact: true })).toBeAttached();
+  // O leitor também existe na biblioteca; aguarde a tela de sessão estar pronta.
+  await expect(
+    page.getByRole('button', { name: 'Modo imersivo (F11)', exact: true }),
+  ).toBeVisible();
   await localKey('F11');
   await expect(
     page.getByRole('button', { name: 'Sair do modo imersivo (F11 ou Esc)', exact: true }),

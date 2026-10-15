@@ -18,12 +18,15 @@ let server: Server;
 let origin: string;
 let data: string;
 let app: ElectronApplication;
+let appProcess: ReturnType<ElectronApplication['process']> | undefined;
 let page: Page;
 let appRunning = false;
 async function exitTestApp() {
   if (!app || !appRunning) return;
   appRunning = false;
-  const process = app.process();
+  // Guarde o processo antes de uma possível queda da conexão com o Playwright.
+  const process = appProcess;
+  if (!process) return;
   if (process.exitCode !== null || process.signalCode !== null) return;
   const exited = new Promise<void>((resolve) => process.once('exit', () => resolve()));
   await app.evaluate(({ app }) => app.exit(0)).catch(() => {});
@@ -49,6 +52,7 @@ async function launch() {
     ],
     env,
   });
+  appProcess = app.process();
   appRunning = true;
   page = await app.firstWindow();
   await expect(page.getByRole('heading', { name: 'Um passo de cada vez.' })).toBeVisible();
@@ -311,6 +315,8 @@ test('aplicativo real: onboarding, persistência, navegador, redirecionamentos, 
   expect(await page.locator('.snake-head').getAttribute('y')).toBe(stopped);
   await page.getByRole('button', { name: 'Continuar jogo', exact: true }).click();
   await page.screenshot({ path: 'test-results/study-break.png' });
+  // Espere o primeiro segundo: runners rápidos podem chegar aqui ainda em 03:00.
+  await expect(page.getByRole('timer')).not.toHaveText('03:00');
   const breakTime = await page.getByRole('timer').textContent();
   await page.getByRole('button', { name: 'Jogar Pac-Man', exact: true }).click();
   await expect(page.locator('.maze-board')).toBeVisible();

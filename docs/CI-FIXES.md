@@ -13,3 +13,13 @@ Correções locais:
 - Workflow: publicar diagnósticos em caso de falha e limitar cada job a 30 minutos. Continua validando Windows, X11 e Wayland.
 
 Verificação local: 74 testes unitários com CI=true, build TypeScript/Vite, sintaxe Bash do novo script e YAML do workflow aprovados. A validação de Linux depende da próxima execução do GitHub Actions; esta máquina é Windows. Nenhuma alteração de dados do usuário, versão do aplicativo ou instalador.
+
+## Resultado do PR #2 e ajustes seguintes
+
+No commit 5bafe0e, o Windows do pull request concluiu testes e instalador; Linux X11 passou nos sete cenários tanto no push quanto no PR. Os timeouts unitários anteriores foram resolvidos.
+
+- Windows/push: a troca de jogo ocorreu antes de completar um segundo, e a asserção imediata rejeitou 03:00. O teste agora aguarda o primeiro segundo antes de verificar se a troca preserva o intervalo. Mantém a verificação após a troca.
+- Linux/Wayland: Weston rejeitou a geometria 1024 × 684 da janela em uma saída de 1024 × 640 e encerrou a conexão. O script agora define saída de 1366 × 768, equivalente ao X11 de teste.
+- O encerramento de testes retém a referência ao processo do Electron, evitando erro secundário ao consultar uma conexão Playwright já fechada.
+
+Correções ainda precisam de nova execução remota para confirmar Wayland.

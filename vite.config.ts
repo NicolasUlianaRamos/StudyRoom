@@ -19,6 +19,12 @@ export default defineConfig(({ command }) => {
         },
       },
     ],
-    test: { include: ['tests/**/*.test.ts'] },
+    test: {
+      include: ['tests/**/*.test.ts'],
+      // SQLite em disco pode demorar mais no runner Windows do CI.
+      testTimeout: process.env.CI ? 20000 : 5000,
+      hookTimeout: process.env.CI ? 20000 : 10000,
+      maxWorkers: process.env.CI ? 2 : undefined,
+    },
   };
 });

@@ -11,16 +11,22 @@ import { pdfFixture } from '../pdf-fixture';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
+// Os cenários compartilham o perfil temporário e continuam a mesma jornada.
+// Interromper a sequência após uma falha evita erros em cascata.
+test.describe.configure({ mode: 'serial' });
 let server: Server;
 let origin: string;
 let data: string;
 let app: ElectronApplication;
+let appProcess: ReturnType<ElectronApplication['process']> | undefined;
 let page: Page;
 let appRunning = false;
 async function exitTestApp() {
   if (!app || !appRunning) return;
   appRunning = false;
-  const process = app.process();
+  // Guarde o processo antes de uma possível queda da conexão com o Playwright.
+  const process = appProcess;
+  if (!process) return;
   if (process.exitCode !== null || process.signalCode !== null) return;
   const exited = new Promise<void>((resolve) => process.once('exit', () => resolve()));
   await app.evaluate(({ app }) => app.exit(0)).catch(() => {});
@@ -46,6 +52,7 @@ async function launch() {
     ],
     env,
   });
+  appProcess = app.process();
   appRunning = true;
   page = await app.firstWindow();
   await expect(page.getByRole('heading', { name: 'Um passo de cada vez.' })).toBeVisible();
@@ -93,10 +100,38 @@ async function viewBounds() {
   });
 }
 async function localKey(key: string) {
-  await app.evaluate(({ BrowserWindow }, key) => {
+  // sendInputEvent exige foco na janela nativa, além do WebContents.
+  await page.bringToFront();
+  await app.evaluate(({ BrowserWindow }) => {
+    const win = BrowserWindow.getAllWindows()[0];
+    win.focus();
+    win.webContents.focus();
+  });
+  await expect
+    .poll(() =>
+      app.evaluate(({ BrowserWindow }) => {
+        const win = BrowserWindow.getAllWindows()[0];
+        return win.isFocused() && win.webContents.isFocused();
+      }),
+    )
+    .toBe(true);
+  await app.evaluate(async ({ BrowserWindow }, key) => {
     const wc = BrowserWindow.getAllWindows()[0].webContents;
-    wc.focus();
-    wc.sendInputEvent({ type: 'keyDown', keyCode: key });
+    // Confirma entrega sem repetir F11, que poderia alternar duas vezes.
+    await new Promise<void>((resolve, reject) => {
+      const onInput = (_event: Electron.Event, input: Electron.Input) => {
+        if (input.type !== 'keyDown' || input.key !== key) return;
+        clearTimeout(timeout);
+        wc.removeListener('before-input-event', onInput);
+        resolve();
+      };
+      const timeout = setTimeout(() => {
+        wc.removeListener('before-input-event', onInput);
+        reject(new Error('Atalho não recebido pelo Electron: ' + key));
+      }, 5000);
+      wc.on('before-input-event', onInput);
+      wc.sendInputEvent({ type: 'keyDown', keyCode: key });
+    });
     wc.sendInputEvent({ type: 'keyUp', keyCode: key });
   }, key);
 }
@@ -308,6 +343,8 @@ test('aplicativo real: onboarding, persistência, navegador, redirecionamentos, 
   expect(await page.locator('.snake-head').getAttribute('y')).toBe(stopped);
   await page.getByRole('button', { name: 'Continuar jogo', exact: true }).click();
   await page.screenshot({ path: 'test-results/study-break.png' });
+  // Espere o primeiro segundo: runners rápidos podem chegar aqui ainda em 03:00.
+  await expect(page.getByRole('timer')).not.toHaveText('03:00');
   const breakTime = await page.getByRole('timer').textContent();
   await page.getByRole('button', { name: 'Jogar Pac-Man', exact: true }).click();
   await expect(page.locator('.maze-board')).toBeVisible();
@@ -386,6 +423,10 @@ test('aplicativo real: onboarding, persistência, navegador, redirecionamentos, 
   });
   expect(rejected).toBe(true);
   await page.getByRole('button', { name: 'Modo imersivo (F11)', exact: true }).click();
+  await expect.poll(async () => (await viewBounds()).fullscreen).toBe(true);
+  await expect(
+    page.getByRole('button', { name: 'Sair do modo imersivo (F11 ou Esc)', exact: true }),
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Encerrar', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'Encerrar sessão' })).toBeVisible();
   await localKey('Escape');
@@ -899,6 +940,10 @@ test('PDF local: importação, renderização, retomada, foco, notas e remoção
   });
   const id = started.pdfs[0].id;
   await expect(page.getByText('Página carregada', { exact: true })).toBeAttached();
+  // O leitor também existe na biblioteca; aguarde a tela de sessão estar pronta.
+  await expect(
+    page.getByRole('button', { name: 'Modo imersivo (F11)', exact: true }),
+  ).toBeVisible();
   await localKey('F11');
   await expect(
     page.getByRole('button', { name: 'Sair do modo imersivo (F11 ou Esc)', exact: true }),

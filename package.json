@@ -70,7 +70,8 @@
       "identity": "-",
       "hardenedRuntime": false,
       "notarize": false,
-      "artifactName": "StudyRoom-${version}-mac-${arch}.${ext}"
+      "artifactName": "StudyRoom-${version}-mac-${arch}.${ext}",
+      "icon": "build/icon-mac.png"
     }
   }
 }

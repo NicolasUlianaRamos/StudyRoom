@@ -65,6 +65,8 @@ jobs:
       - name: Smoke test packaged app (Linux)
         if: runner.os == 'Linux'
         run: xvfb-run --auto-servernum sh scripts/x11-test.sh node scripts/package-smoke.mjs
+      - name: Installer checksums
+        run: node scripts/checksums.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: StudyRoom-${{ matrix.os }}
@@ -73,4 +75,6 @@ jobs:
             release/*.AppImage
             release/*.deb
             release/*.dmg
+            release/SHA256SUMS.txt
+            docs/COMPARTILHAR.md
           if-no-files-found: error
